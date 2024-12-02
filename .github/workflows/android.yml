@@ -1,4 +1,4 @@
-name: Android Build
+name: Build Android Project with Kotlin
 
 on:
   push:
@@ -13,39 +13,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Check out repository
       uses: actions/checkout@v3
 
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'temurin'
 
-    - name: Install Android SDK
+    - name: Install Android Command Line Tools
       run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget https://dl.google.com/dl/android/studio/ide-zips/2023.2.1.21/android-studio-2023.2.1.21-linux.tar.gz
-        tar -xvzf android-studio-2023.2.1.21-linux.tar.gz
-        sudo mv android-studio /opt/
-        export ANDROID_HOME=/opt/android-studio
-        export PATH=$PATH:$ANDROID_HOME/bin
-        sdkmanager "platforms;android-33" "build-tools;33.0.0" "platform-tools" "tools"
-        sdkmanager --update
+        mkdir -p $HOME/android-sdk-linux
+        cd $HOME/android-sdk-linux
+        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+        unzip commandlinetools-linux-8512546_latest.zip
+        rm commandlinetools-linux-8512546_latest.zip
+        echo "export ANDROID_SDK_ROOT=$HOME/android-sdk-linux" >> $GITHUB_ENV
+        echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_ENV
+
+    - name: Install SDK Packages
+      run: |
+        sdkmanager --licenses
+        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
     - name: Create Android Project
       run: |
-        # Crear un nuevo proyecto con el nombre Generador
-        ./gradlew createProject \
-        -Pname="Generador" \
-        -Ppackage="com.android.generador" \
-        -Planguage=kotlin
+        # Crear el proyecto
+        cd $GITHUB_WORKSPACE
+        echo "Creating Android project..."
+        mkdir Generador
+        cd Generador
+        # Crear el proyecto con los parámetros proporcionados
+        sdkmanager "tools"
+        yes | sdkmanager --update
+        echo "y" | avdmanager create avd --name "test" --package "system-images;android-30;google_apis;x86_64"
+        
+        # Usar el comando 'gradle' para configurar un nuevo proyecto en Kotlin
+        gradle init --type kotlin-library
+        
+        # Hacer el cambio del paquete y el nombre del proyecto
+        echo "package com.android.generador" > src/main/kotlin/com/android/generador/Generador.kt
 
-    - name: Build the app
+    - name: Build the Project
       run: |
+        cd $GITHUB_WORKSPACE/Generador
         ./gradlew build
 
-    - name: Run tests
-      run: |
-        ./gradlew test
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: $GITHUB_WORKSPACE/Generador/build/outputs/
+

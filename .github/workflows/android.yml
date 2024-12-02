@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'  # Android requiere Java 11
-        distribution: 'zulu'
+        distribution: 'zulu'  # O usa 'zulu' si prefieres esa distribución
     
     - name: Install Android SDK
       run: |
@@ -34,11 +34,12 @@ jobs:
         unzip commandlinetools-linux.zip -d $HOME/Android/cmdline-tools
         rm commandlinetools-linux.zip
 
-        # Establecer las variables de entorno
+        # Establecer las variables de entorno y agregar cmdline-tools al PATH
         echo "export ANDROID_HOME=$HOME/Android" >> $GITHUB_ENV
         echo "export PATH=$PATH:$ANDROID_HOME/cmdline-tools/bin" >> $GITHUB_ENV
 
-        # Instalar las herramientas del SDK necesarias (puedes agregar más si las necesitas)
+        # Actualizar sdkmanager y verificar que funciona
+        export PATH=$PATH:$HOME/Android/cmdline-tools/bin  # Añadimos manualmente al PATH en este paso
         yes | sdkmanager --sdk_root=$ANDROID_HOME --update
         yes | sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-30" "build-tools;30.0.3"
         

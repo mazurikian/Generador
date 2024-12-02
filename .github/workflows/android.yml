@@ -20,6 +20,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'  # Android requiere Java 11
+        distribution: 'zulu'
     
     - name: Install Android SDK
       run: |

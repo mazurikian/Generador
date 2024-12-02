@@ -36,6 +36,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/wrapper-validation-action@v1
 
+      # Da permisos de ejecución al script gradlew
+      - name: Give execute permission to gradlew
+        run: chmod +x ./gradlew
+
       # Compila la aplicación
       - name: Build APK
         run: ./gradlew assembleRelease

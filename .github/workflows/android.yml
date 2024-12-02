@@ -1,74 +1,38 @@
-name: Build Android Project with Kotlin
+name: Android Build
 
 on:
   push:
     branches:
-      - main
+      - main  # Cambia 'main' por la rama en la que trabajas si es diferente
   pull_request:
     branches:
-      - main
+      - main  # Cambia 'main' por la rama en la que trabajas si es diferente
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-latest  # Usamos la última versión de Ubuntu como entorno de ejecución
+    
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v3
-
+    - name: Checkout repository
+      uses: actions/checkout@v3  # Clona el repositorio
+    
     - name: Set up JDK 11
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
-        distribution: 'zulu'
+        java-version: '11'  # Android requiere Java 11, pero si necesitas otro JDK, cámbialo
+        distribution: 'adoptopenjdk'
+    
+    - name: Set up Android SDK
+      uses: reactivecircus/android-sdk-manager-action@v3
+      with:
+        api-levels: '30'  # Cambia esto al nivel de API que estés utilizando
+        build-tools: '30.0.3'  # Cambia a la versión de build-tools que estés utilizando
+    
+    - name: Build Release APK
+      run: ./gradlew assembleRelease  # Para compilar el APK de release, puedes cambiar a assembleDebug si necesitas el APK de debug
 
-    - name: Install Android Command Line Tools
-      run: |
-        # Crear el directorio para el SDK de Android
-        mkdir -p $HOME/android-sdk-linux
-        cd $HOME/android-sdk-linux
-        
-        # Descargar las herramientas de línea de comandos de Android
-        wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-        unzip commandlinetools-linux-8512546_latest.zip
-        rm commandlinetools-linux-8512546_latest.zip
-        
-        # Establecer las variables de entorno para el SDK
-        echo "export ANDROID_SDK_ROOT=$HOME/android-sdk-linux" >> $GITHUB_ENV
-        echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_ENV
-        echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
-
-    - name: Install SDK Packages
-      run: |
-        # Actualizar SDK y aceptar licencias
-        sdkmanager --update
-        sdkmanager --licenses
-        
-        # Instalar las herramientas necesarias para la compilación
-        sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
-
-    - name: Create Android Project
-      run: |
-        # Crear el proyecto
-        cd $GITHUB_WORKSPACE
-        echo "Creating Android project..."
-        mkdir Generador
-        cd Generador
-        
-        # Inicializar el proyecto con Gradle y Kotlin
-        gradle init --type kotlin-library
-        
-        # Crear el archivo Kotlin
-        mkdir -p src/main/kotlin/com/android/generador
-        echo "package com.android.generador" > src/main/kotlin/com/android/generador/Generador.kt
-
-    - name: Build the Project
-      run: |
-        cd $GITHUB_WORKSPACE/Generador
-        ./gradlew build
-
-    - name: Upload build artifacts
+    - name: Upload Build Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: app-release
-        path: $GITHUB_WORKSPACE/Generador/build/outputs/
+        name: apk
+        path: app/build/outputs/apk/release/app-release.apk  # Cambia según la ruta de salida de tu APK

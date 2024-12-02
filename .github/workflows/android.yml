@@ -36,26 +36,13 @@ jobs:
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
-      # 5. Genera un archivo Keystore para la firma del APK
-      - name: Generate Keystore
-        run: |
-          keytool -genkeypair -v -keystore keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias generador -dname "CN=Generador, OU=Generador, O=Generador, L=Ciudad, S=Estado, C=US" -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }}
-
-      # 6. Configura el archivo keystore para usarlo en el proceso de firma
-      - name: Setup Keystore Environment
-        run: |
-          echo "KEYSTORE_FILE=keystore.jks" >> $GITHUB_ENV
-          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
-          echo "KEY_ALIAS=generador" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-
-      # 7. Configura Gradle para firmar el APK con el Keystore generado
+      # 5. Configura Gradle para firmar el APK con el Keystore generado
       - name: Build APK
         run: ./gradlew assembleRelease
 
-      # 8. Subir el APK generado a GitHub Artifacts
+      # 6. Subir el APK generado a GitHub Artifacts
       - name: Upload APK to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: app-release-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/*/*.apk

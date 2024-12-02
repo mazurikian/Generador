@@ -23,10 +23,10 @@ jobs:
         distribution: 'adoptopenjdk'
     
     - name: Set up Android SDK
-      uses: reactivecircus/android-sdk-manager-action@v3
+      uses: github-actions/setup-android@v2
       with:
-        api-levels: '30'  # Cambia esto al nivel de API que estés utilizando
-        build-tools: '30.0.3'  # Cambia a la versión de build-tools que estés utilizando
+        api-level: 30  # Cambia esto al nivel de API que estés utilizando
+        build-tools: 30.0.3  # Cambia a la versión de build-tools que estés utilizando
     
     - name: Build Release APK
       run: ./gradlew assembleRelease  # Para compilar el APK de release, puedes cambiar a assembleDebug si necesitas el APK de debug

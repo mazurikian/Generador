@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4.5.0
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: 11
 
       # 3. Revisa el código del repositorio
       - name: Checkout code

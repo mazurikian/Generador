@@ -20,13 +20,14 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'zulu'  # Especificamos la distribución
+        distribution: 'zulu'
 
     - name: Install Android Command Line Tools
       run: |
         # Crear el directorio para el SDK de Android
         mkdir -p $HOME/android-sdk-linux
         cd $HOME/android-sdk-linux
+        
         # Descargar las herramientas de línea de comandos de Android
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
         unzip commandlinetools-linux-8512546_latest.zip
@@ -36,15 +37,14 @@ jobs:
         echo "export ANDROID_SDK_ROOT=$HOME/android-sdk-linux" >> $GITHUB_ENV
         echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_ENV
         echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
-        
-        # Verificar que sdkmanager esté accesible
-        echo "Verificando sdkmanager"
-        sdkmanager --version
 
     - name: Install SDK Packages
       run: |
-        # Aceptar todas las licencias y instalar los paquetes necesarios
+        # Actualizar SDK y aceptar licencias
+        sdkmanager --update
         sdkmanager --licenses
+        
+        # Instalar las herramientas necesarias para la compilación
         sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
     - name: Create Android Project
@@ -54,6 +54,7 @@ jobs:
         echo "Creating Android project..."
         mkdir Generador
         cd Generador
+        
         # Inicializar el proyecto con Gradle y Kotlin
         gradle init --type kotlin-library
         

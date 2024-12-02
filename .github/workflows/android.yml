@@ -20,12 +20,12 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'adoptopenjdk'
+        distribution: 'temurin'
 
     - name: Install Android SDK
       run: |
         sudo apt-get update
-        sudo apt-get install -y openjdk-11-jdk wget unzip
+        sudo apt-get install -y wget unzip
         wget https://dl.google.com/dl/android/studio/ide-zips/2023.2.1.21/android-studio-2023.2.1.21-linux.tar.gz
         tar -xvzf android-studio-2023.2.1.21-linux.tar.gz
         sudo mv android-studio /opt/

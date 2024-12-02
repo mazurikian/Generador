@@ -17,9 +17,9 @@ jobs:
       - name: Setup Android SDK Tools
         uses: android-actions/setup-android@v3.2.2
         with:
-          android-version: '33'
-          api-level: 33
-          build-tools-version: '33.0.0'
+          cmdline-tools-version: 'latest'
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: true
 
       # Configura el JDK de Java
       - name: Setup Java JDK

@@ -20,20 +20,30 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'zulu'
+        distribution: 'zulu'  # Especificamos la distribución
 
     - name: Install Android Command Line Tools
       run: |
+        # Crear el directorio para el SDK de Android
         mkdir -p $HOME/android-sdk-linux
         cd $HOME/android-sdk-linux
+        # Descargar las herramientas de línea de comandos de Android
         wget https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
         unzip commandlinetools-linux-8512546_latest.zip
         rm commandlinetools-linux-8512546_latest.zip
+        
+        # Establecer las variables de entorno para el SDK
         echo "export ANDROID_SDK_ROOT=$HOME/android-sdk-linux" >> $GITHUB_ENV
         echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_ENV
+        echo "export PATH=\$PATH:\$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_ENV
+        
+        # Verificar que sdkmanager esté accesible
+        echo "Verificando sdkmanager"
+        sdkmanager --version
 
     - name: Install SDK Packages
       run: |
+        # Aceptar todas las licencias y instalar los paquetes necesarios
         sdkmanager --licenses
         sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30" "system-images;android-30;google_apis;x86_64"
 
@@ -44,15 +54,11 @@ jobs:
         echo "Creating Android project..."
         mkdir Generador
         cd Generador
-        # Crear el proyecto con los parámetros proporcionados
-        sdkmanager "tools"
-        yes | sdkmanager --update
-        echo "y" | avdmanager create avd --name "test" --package "system-images;android-30;google_apis;x86_64"
-        
-        # Usar el comando 'gradle' para configurar un nuevo proyecto en Kotlin
+        # Inicializar el proyecto con Gradle y Kotlin
         gradle init --type kotlin-library
         
-        # Hacer el cambio del paquete y el nombre del proyecto
+        # Crear el archivo Kotlin
+        mkdir -p src/main/kotlin/com/android/generador
         echo "package com.android.generador" > src/main/kotlin/com/android/generador/Generador.kt
 
     - name: Build the Project
@@ -65,4 +71,3 @@ jobs:
       with:
         name: app-release
         path: $GITHUB_WORKSPACE/Generador/build/outputs/
-

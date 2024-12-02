@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Configura el SDK de Android
+      # 1. Configura el SDK de Android
       - name: Setup Android SDK Tools
         uses: android-actions/setup-android@v3.2.2
         with:
@@ -21,30 +21,39 @@ jobs:
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true
 
-      # Configura el JDK de Java
+      # 2. Configura el JDK de Java
       - name: Setup Java JDK
         uses: actions/setup-java@v4.5.0
         with:
           distribution: 'temurin'
           java-version: 17
 
-      # Revisa el código del repositorio
+      # 3. Revisa el código del repositorio
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Configura Gradle
-      - name: Set up Gradle
-        uses: gradle/wrapper-validation-action@v1
-
-      # Da permisos de ejecución al script gradlew
+      # 4. Da permisos de ejecución al script gradlew
       - name: Give execute permission to gradlew
         run: chmod +x ./gradlew
 
-      # Compila la aplicación
+      # 5. Genera un archivo Keystore para la firma del APK
+      - name: Generate Keystore
+        run: |
+          keytool -genkeypair -v -keystore keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias generador -dname "CN=Generador, OU=Generador, O=Generador, L=Ciudad, S=Estado, C=US" -storepass ${{ secrets.KEYSTORE_PASSWORD }} -keypass ${{ secrets.KEY_PASSWORD }}
+
+      # 6. Configura el archivo keystore para usarlo en el proceso de firma
+      - name: Setup Keystore Environment
+        run: |
+          echo "KEYSTORE_FILE=keystore.jks" >> $GITHUB_ENV
+          echo "KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "KEY_ALIAS=generador" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      # 7. Configura Gradle para firmar el APK con el Keystore generado
       - name: Build APK
         run: ./gradlew assembleRelease
 
-      # Subir el APK a GitHub Artifacts
+      # 8. Subir el APK generado a GitHub Artifacts
       - name: Upload APK to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
